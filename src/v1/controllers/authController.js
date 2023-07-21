@@ -17,7 +17,7 @@ const createAndSendToken = (user, code, res) => {
 
   res.cookie('jwt', token, {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + parseInt(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
@@ -40,7 +40,7 @@ exports.signin = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new UnAuthenticated('Invalid email or password', 401))
   }
-  const verified = await user.verifyPassword(password, user.password)
+  const verified = await user.matchPassword(password)
   if (!verified) {
     return next(new UnAuthenticated('Invalid email or password', 401))
   }
