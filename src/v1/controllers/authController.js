@@ -1,8 +1,11 @@
 const User = require('../../models/User')
-const catchAsync = require('../utils/catchAsync')
-const Error = require('../utils/Error')
+const catchAsync = require('../../utils/catchAsync')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const BadRequest = require('../../errors/badRequest')
+const UnAuthenticated = require('../../errors/unAuthenticated')
+const NotFound = require('../../errors/not-found')
+const InternalServerError = require('../../errors/internalError')
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -23,18 +26,23 @@ const createAndSendToken = (user, code, res) => {
   res.status(code).json({ status: 'success', token, user })
 }
 
+/**
+ * Handlker for signing in a new user
+ */
 exports.signin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body
   if (!email || !password) {
-    throw new Error(`Please enter your ${!email ? 'email' : 'password'}!!`, 400)
+    return next(
+      new BadRequest(`Please enter your ${!email ? 'email' : 'password'}!!`)
+    )
   }
   const user = await User.findOne({ email }).select('+password')
   if (!user) {
-    throw new Error('Invalid email or password', 401)
+    return next(new UnAuthenticated('Invalid email or password', 401))
   }
   const verified = await user.verifyPassword(password, user.password)
   if (!verified) {
-    throw new Error('Invalid email or password', 401)
+    return next(new UnAuthenticated('Invalid email or password', 401))
   }
   createAndSendToken(user, 200, res)
 })
@@ -52,23 +60,21 @@ exports.logout = (req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
-    username: req.body.username,
-    password: req.body.password,
-    confirmpass: req.body.confirmpass,
     email: req.body.email,
+    password: req.body.password,
+    about: req.body.about,
   })
-  const url = `${req.protocol}://${req.get('host')}/me`
-  await new Email(newUser, url).sendWelcome()
+
   createAndSendToken(newUser, 201, res)
 })
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   if (!req.body.email) {
-    throw new Error('Please provide an email!!', 404)
+    return next(new BadRequest('Please provide an email!!'))
   }
   const user = await User.findOne({ email: req.body.email })
   if (!user) {
-    throw new Error('User does not exist!!', 404)
+    return next(new NotFound('User does not exist!!'))
   }
   const resetToken = user.getPasswordResetToken()
   await user.save({ validateBeforeSave: false })
@@ -77,20 +83,17 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   )}/api/v1/users/resetpassword/${resetToken}`
   try {
     await new Email(user, resetURL).sendPasswordReset()
-    res
-      .status(200)
-      .json({
-        status: 'success',
-        message: 'Token sent to your email success fully!!',
-      })
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to your email success fully!!',
+    })
   } catch (err) {
     user.passwordResetToken = undefined
     user.resetTokenExpiresAt = undefined
     await user.save({ validateBeforeSave: false })
     return next(
-      new Error(
-        'There is an error sending the email, please try again later!',
-        500
+      new InternalServerError(
+        'There is an error sending the email, please try again later!'
       )
     )
   }
@@ -108,7 +111,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   })
 
   if (!user) {
-    throw new Error('Token is invalid or has expired!', 400)
+    return next(new UnAuthenticated('Token is invalid or has expired!'))
   }
   user.password = req.body.password
   user.confirmpass = req.body.confirmpass
@@ -122,7 +125,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password')
   const oldPass = req.body.password
   if (!(await user.verifyPassword(oldPass, user.password))) {
-    throw new Error('Invalid password', 401)
+    return next(new Error('Invalid password', 401))
   }
   user.password = req.body.newpassword
   user.confirmpass = req.body.confirmpass
