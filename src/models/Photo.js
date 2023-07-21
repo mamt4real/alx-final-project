@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose')
 
 const photoSchema = Schema(
   {
-    name: String,
+    title: String,
     description: String,
     url: {
       type: String,

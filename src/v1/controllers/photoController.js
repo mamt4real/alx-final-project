@@ -16,10 +16,12 @@ const likeDislikePhoto = catchAsync(async (req, res, next) => {
 
 const getAllPhotos = GeneralController.getAll(Photo)
 const getOnePhoto = GeneralController.getOne(Photo)
+const updatePhoto = GeneralController.updateOne(Photo, ['owner', 'url'])
 
 module.exports = {
   getAllPhotos,
   getOnePhoto,
   downloadPhoto,
   uploadPhoto,
+  updatePhoto,
 }

@@ -5,12 +5,15 @@ const express = require('express')
 const cors = require('cors')
 const v1Router = require('./v1/routes/index')
 const errorHandler = require('./middlewares/error')
+const path = require('path')
 
 // Configure express
 const app = express()
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+//supply static files
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Hello World endpoint
 app.get('/', (req, res) => {
