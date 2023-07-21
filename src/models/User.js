@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const UserSchema = new mongoose.Schema(
   {
     email: {
-      type: String,
+      type,
       required: [true, 'Please add an email'],
       unique: [true, 'Email Already Exist'],
       match: [
@@ -15,21 +15,21 @@ const UserSchema = new mongoose.Schema(
       ],
     },
     username: {
-      type: String,
+      type,
       default: function () {
         return this.email.split('@')[0]
       },
     },
-    name: String,
-    about: String,
-    image: String,
+    name,
+    about,
+    image,
     password: {
-      type: String,
+      type,
       required: [true, 'Please add a password'],
       minlength: 6,
       select: false,
     },
-    resetPasswordToken: String,
+    resetPasswordToken,
     resetPasswordExpire: Date,
   },
   {

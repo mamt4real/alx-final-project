@@ -1,10 +1,10 @@
-import ErrorResponse from "./errorResponse.js"
+const ErrorResponse = require('./errorResponse.js')
 
 class NotFound extends ErrorResponse {
   name = 'NotFound'
-  constructor(message:string) {
+  constructor(message) {
     super(message, 404)
   }
 }
 
-export default NotFound
+module.exports = NotFound

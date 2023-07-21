@@ -1,8 +1,8 @@
-import ErrorResponse from './errorResponse.js'
+const ErrorResponse = require('./errorResponse.js')
 
 class Forbidden extends ErrorResponse {
-  constructor(message: string) {
+  constructor(message) {
     super(message, 403)
   }
 }
-export default Forbidden
+module.exports = Forbidden

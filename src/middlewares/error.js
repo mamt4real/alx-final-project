@@ -1,6 +1,6 @@
 const { BadRequest } = require('../src/errors')
 const { isDevEnv } = require('../utils/constants')
-const ErrorResponse = require('../utils/errorResponse')
+const ErrorResponse = require('../errors/errorResponse')
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err }

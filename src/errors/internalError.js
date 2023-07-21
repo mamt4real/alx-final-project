@@ -1,10 +1,10 @@
 class InternalServerError extends Error {
   isUserError = false
-  statusCode:number
-  constructor(message:string) {
+
+  constructor(message) {
     super(message)
     this.statusCode = 500
   }
 }
 
-export default InternalServerError
+module.exports = InternalServerError

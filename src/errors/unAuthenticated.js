@@ -1,10 +1,10 @@
-import ErrorResponse from "./errorResponse.js"
+const ErrorResponse = require('./errorResponse.js')
 
 class UnAuthenticated extends ErrorResponse {
   name = 'UnAuthenticated'
-  constructor(message:string) {
+  constructor(message) {
     super(message, 401)
   }
 }
 
-export default UnAuthenticated
+module.exports = UnAuthenticated
