@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
   res
     .status(200)
     .send(
-      `app API v${process.env.API_VERSION || 1} running on PORT: ${
+      `E-PHOTOZ API v${process.env.API_VERSION || 1} running on PORT: ${
         process.env.PORT
       } successfully`
     )

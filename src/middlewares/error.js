@@ -1,4 +1,4 @@
-const { BadRequest } = require('../src/errors')
+const BadRequest = require('../errors/badRequest')
 const { isDevEnv } = require('../utils/constants')
 const ErrorResponse = require('../errors/errorResponse')
 
