@@ -1,14 +1,8 @@
 const QueryHandler = require('./queryHandler')
-const {
-  BadRequest,
-  NotFound,
-  RestrictedError,
-  PolicyLockedError,
-} = require('../errors')
 const { default: mongoose, Model } = require('mongoose')
-const asyncHandler = require('../../middleware/async')
-const Policy = require('../../models/Policy')
-const { toNDigits, generateRandomToken } = require('../../utils/helper')
+const catchAsync = require('../utils/catchAsync')
+const NotFound = require('../errors/not-found')
+const BadRequest = require('../errors/badRequest')
 
 const confirmExistence = (doc, docName) => {
   if (!doc) {
@@ -18,7 +12,7 @@ const confirmExistence = (doc, docName) => {
 }
 
 exports.deleteOne = (Model) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const id = req.params[Model.modelName.toLowerCase() + 'ID']
     const [valid, invalid] = exports.validateIds(id)
     if (!valid) {
@@ -37,7 +31,7 @@ exports.deleteOne = (Model) =>
  * @returns
  */
 exports.updateOne = (Model, forbiddenFields = []) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const id = req.params[Model.modelName.toLowerCase() + 'ID']
     const [valid, invalid] = exports.validateIds(id)
     if (!valid) {
@@ -69,7 +63,7 @@ exports.updateOne = (Model, forbiddenFields = []) =>
  */
 
 exports.getOne = (Model, populateOptions = []) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const id = req.params[Model.modelName.toLowerCase() + 'ID']
     const [valid, invalid] = exports.validateIds(id)
     if (!valid) {
@@ -96,7 +90,7 @@ exports.getOne = (Model, populateOptions = []) =>
  */
 
 exports.getAll = (Model, restructureFunction = null) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const filter = req.filter ? req.filter : {}
     const Processor = new QueryHandler(Model, { ...req.query, ...filter })
     let results = await Processor.process()
@@ -116,7 +110,7 @@ exports.getAll = (Model, restructureFunction = null) =>
  */
 
 exports.createOne = (Model, validator = false, callback = false) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     // Validate Body if validator is passed
     if (validator) {
       const { error } = validator(req.body)
@@ -137,7 +131,7 @@ exports.createOne = (Model, validator = false, callback = false) =>
  * @returns {Function}
  */
 exports.updateMe = (Model, prohibited = []) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const data = req.body
 
     if (data.hasOwnProperty('password') || data.hasOwnProperty('type'))
@@ -162,7 +156,7 @@ exports.updateMe = (Model, prohibited = []) =>
  * @returns
  */
 exports.allowEdits = (Model, keys, addedCheckFxn = (doc) => [true, '']) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     const id = req.params[Model.modelName.toLowerCase() + 'ID']
     const [valid, invalid] = exports.validateIds(id)
     if (!valid) {

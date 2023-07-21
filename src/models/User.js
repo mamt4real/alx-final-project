@@ -2,11 +2,12 @@ const crypto = require('crypto')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { ROLES } = require('../utils/constants')
 
 const UserSchema = new mongoose.Schema(
   {
     email: {
-      type,
+      type: String,
       required: [true, 'Please add an email'],
       unique: [true, 'Email Already Exist'],
       match: [
@@ -15,22 +16,31 @@ const UserSchema = new mongoose.Schema(
       ],
     },
     username: {
-      type,
+      type: String,
       default: function () {
         return this.email.split('@')[0]
       },
     },
-    name,
-    about,
-    image,
+    name: String,
+    about: String,
+    image: String,
     password: {
-      type,
+      type: String,
       required: [true, 'Please add a password'],
       minlength: 6,
       select: false,
     },
-    resetPasswordToken,
+    resetPasswordToken: String,
     resetPasswordExpire: Date,
+    role: {
+      type: String,
+      default: ROLES.USER,
+      required: true,
+      enum: {
+        values: Object.values(ROLES),
+        message: 'invalid role',
+      },
+    },
   },
   {
     toJSON: {
