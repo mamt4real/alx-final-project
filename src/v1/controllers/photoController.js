@@ -16,15 +16,13 @@ const downloadPhoto = catchAsync(async (req, res, next) => {
   const subPath = photo.url.split('/images/')[1]
   const fullPath = getPhotoLocalPath(subPath)
   const filename = photo.url.substring(photo.url.lastIndexOf('/'))
-  const ws = fs.createWriteStream(fullPath)
+  const ws = fs.createReadStream(fullPath)
 
-  const reply = req.query.inline ? 'inline' : 'attachment'
-
-  res.setHeader('Content-Disposition', `${reply}; filename=${filename}`)
-  res.setHeader('Content-Type', 'image/jpeg')
-  return ws.write(res, function () {
-    res.status(200).end()
+  ws.on('open', () => {
+    res.attachment(filename)
+    ws.pipe(res)
   })
+  ws.on('error', next)
 })
 
 const likeDislikePhoto = GeneralController.like(Photo)
