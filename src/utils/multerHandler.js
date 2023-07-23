@@ -3,6 +3,16 @@ const BadRequest = require('../errors/badRequest')
 const memStorage = multer.memoryStorage()
 const sharp = require('sharp')
 const catchAsync = require('./catchAsync')
+const UnAuthenticated = require('../errors/unAuthenticated')
+const path = require('path')
+
+/**
+ * Returns the full local path to an image file
+ * @param {string} subPath the path to attach
+ * @returns
+ */
+const getPhotoLocalPath = (subPath) =>
+  path.join(__dirname, '../public/images', subPath)
 
 /**
  * Disk Storage
@@ -47,9 +57,9 @@ const resizeUserPhoto = catchAsync(async (req, res, next) => {
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
-    .toFile(`public/images/users/${req.file.filename}`)
+    .toFile(getPhotoLocalPath(`users/${req.file.filename}`))
 
-  req.body.image = `${req.protocol}://${req.get('host')}/images/${
+  req.body.image = `${req.protocol}://${req.get('host')}/images/users/${
     req.file.filename
   }`
   next()
@@ -59,18 +69,30 @@ const resizeUserPhoto = catchAsync(async (req, res, next) => {
  * Middleware to resize an uploaded photo into 4:3 aspect ratio
  */
 const resizeSinglePhoto = catchAsync(async (req, res, next) => {
-  if (!req.file) return next()
-  const filename = `photo-${req.user?._id}-${req.file.originalname}.jpg`
-  await sharp(inputImagePath)
+  if (!req.user)
+    return next(new UnAuthenticated('You must login to upload a file'))
+  if (!req.file)
+    return next(
+      new BadRequest('you must upload an image file with fieldname image!')
+    )
+  const splitted = req.file.originalname?.trim().replace(/\s/, '_').split('.')
+  const oname = splitted.splice(0, -1).join('')
+  const ext = splitted.splice(-1)[0]
+  const filename = `photo-${req.user?._id}-${oname}.jpg`
+  await sharp(req.file.buffer)
     .resize({
       width: 800,
       height: 600,
       fit: sharp.fit.inside,
       position: sharp.strategy.entropy,
     })
+    .toFormat('jpeg')
     .jpeg({ quality: 85 })
-    .toFile(`public/images/photos/${filename}`)
-  req.body.url = `${req.protocol}://${req.get('host')}/images/${filename}`
+    .toFile(getPhotoLocalPath(`photos/${filename}`))
+  req.body.url = `${req.protocol}://${req.get(
+    'host'
+  )}/images/photos/${filename}`
+  req.body.owner = req.user._id
   next()
 })
 
@@ -83,6 +105,8 @@ const uploadSinglePhoto = multer({
 }).single('image')
 
 module.exports = {
+  resizeUserPhoto,
   uploadSinglePhoto,
   resizeSinglePhoto,
+  getPhotoLocalPath,
 }

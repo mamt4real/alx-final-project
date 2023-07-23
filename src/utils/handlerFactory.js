@@ -3,6 +3,8 @@ const { default: mongoose, Model } = require('mongoose')
 const catchAsync = require('../utils/catchAsync')
 const NotFound = require('../errors/not-found')
 const BadRequest = require('../errors/badRequest')
+const Forbidden = require('../errors/forbidden')
+const UnAuthenticated = require('../errors/unAuthenticated')
 
 const confirmExistence = (doc, docName) => {
   if (!doc) {
@@ -163,8 +165,7 @@ exports.allowEdits = (Model, keys, addedCheckFxn = (doc) => [true, '']) =>
       return next(new BadRequest(`${invalid} is an Invalid Id`))
     }
     const doc = await Model.findById(id)
-    if (!doc)
-      return res.status(404).json({ message: `No document with id: ${id}` })
+    if (!doc) return next(new NotFound(`No document with id: ${id}`))
     const checkValue = addedCheckFxn(doc)
     if (!checkValue[0]) return res.status(400).json({ message: checkValue[1] })
     req.targetDoc = doc
@@ -175,10 +176,43 @@ exports.allowEdits = (Model, keys, addedCheckFxn = (doc) => [true, '']) =>
       }
     }
     next(
-      new RestrictedError(
+      new Forbidden(
         `You can only ${req.method.toLowerCase()} ${Model.modelName.toLowerCase()} you created`
       )
     )
+  })
+
+/**
+ * A generic Handler for Like
+ * @param {Model} Model
+ * @returns
+ */
+exports.like = (Model) =>
+  catchAsync(async (req, res, next) => {
+    if (!req.user)
+      return next(
+        new UnAuthenticated('You are not logged in!, please login to proceed')
+      )
+    const id = Model.modelName.toLowerCase() + 'ID'
+    const method = req.method.toLowerCase()
+    let updated
+    if (method === 'post') {
+      updated = await Model.updateOne(
+        { _id: req.params[id], likes: { $ne: req.user._id } },
+        { $addToSet: { likes: req.user.id } }
+      )
+    } else {
+      // method === delete
+      updated = await Model.updateOne(
+        { _id: req.params[id], likes: req.user._id },
+        { $pull: { likes: req.user.id } }
+      )
+    }
+    res.status(200).json({
+      status: 'success',
+      message: `Updated successfully`,
+      data: updated,
+    })
   })
 
 /**

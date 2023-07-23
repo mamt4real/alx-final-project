@@ -14,14 +14,19 @@ exports.protectedRoute = catchAsync(async (req, res, next) => {
   ) {
     // Set token from Bearer token in header
     token = req.headers.authorization.split(' ')[1]
+
     // Set token from cookie
-  } else if (req.cookies.token) {
+  } else if (req.cookies?.token) {
     token = req.cookies.token
   }
 
   // Make sure token exists
   if (!token) {
-    return next(new UnAuthenticated('Not authorized to access this route'))
+    return next(
+      new UnAuthenticated(
+        'You are not logged in, please login to access this route'
+      )
+    )
   }
 
   try {
@@ -36,7 +41,7 @@ exports.protectedRoute = catchAsync(async (req, res, next) => {
     req.user = user
     next()
   } catch (err) {
-    return next(new UnAuthenticated('Not authorized to access this route'))
+    return next(err)
   }
 })
 

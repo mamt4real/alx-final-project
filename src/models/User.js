@@ -24,6 +24,18 @@ const UserSchema = new mongoose.Schema(
     name: String,
     about: String,
     image: String,
+    followers: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
+    followings: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
     password: {
       type: String,
       required: [true, 'Please add a password'],
@@ -57,6 +69,23 @@ const UserSchema = new mongoose.Schema(
   }
 )
 
+// Virtual Fields
+UserSchema.virtual('noOfFollowers').get(function () {
+  if (this.followers) return this.followers.length
+  return 0
+})
+
+UserSchema.virtual('noOfFollowings').get(function () {
+  if (this.followings) return this.followings.length
+  return 0
+})
+
+UserSchema.virtual('photos', {
+  localField: '_id',
+  foreignField: 'owner',
+  ref: 'Photo',
+})
+
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function (next) {
   if (this.isModified('password') || this.isNew) {
@@ -68,9 +97,13 @@ UserSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  })
+  return jwt.sign(
+    { id: this._id, username: this.username, iat: Date.now() },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    }
+  )
 }
 
 // Match user entered password to hashed password in database

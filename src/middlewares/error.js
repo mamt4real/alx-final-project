@@ -1,6 +1,7 @@
 const BadRequest = require('../errors/badRequest')
 const { isDevEnv } = require('../utils/constants')
 const ErrorResponse = require('../errors/errorResponse')
+const UnAuthenticated = require('../errors/unAuthenticated')
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err }
@@ -40,6 +41,10 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorResponse(message, 400)
   }
 
+  if (err.name === 'TokenExpiredError') {
+    const message = 'Your token has expired, please login again'
+    error = new UnAuthenticated(message)
+  }
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Server Error',

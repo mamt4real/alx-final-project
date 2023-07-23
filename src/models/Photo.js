@@ -18,6 +18,10 @@ const photoSchema = Schema(
       ref: 'User',
       default: [],
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -28,10 +32,12 @@ const photoSchema = Schema(
 
 photoSchema.pre(/^find/, function (next) {
   this.populate('owner', 'image username')
+  next()
 })
 
 photoSchema.pre('findOne', function (next) {
   this.populate('likes', 'image username')
+  next()
 })
 
 const Photo = model('Photo', photoSchema)

@@ -7,14 +7,8 @@ const UnAuthenticated = require('../../errors/unAuthenticated')
 const NotFound = require('../../errors/not-found')
 const InternalServerError = require('../../errors/internalError')
 
-const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  })
-
 const createAndSendToken = (user, code, res) => {
-  const token = signToken(user.id)
-
+  const token = user.getSignedJwtToken()
   res.cookie('jwt', token, {
     expires: new Date(
       Date.now() + parseInt(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000
