@@ -21,6 +21,7 @@ const photoSchema = Schema(
     deleted: {
       type: Boolean,
       default: false,
+      select: false,
     },
   },
   {
@@ -32,6 +33,8 @@ const photoSchema = Schema(
 
 photoSchema.pre(/^find/, function (next) {
   this.populate('owner', 'image username')
+    .find({ deleted: false })
+    .select('-__v')
   next()
 })
 

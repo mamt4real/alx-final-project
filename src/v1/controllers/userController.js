@@ -25,11 +25,6 @@ exports.userPhotoFilter = catchAsync(async (req, res, next) => {
   next()
 })
 
-exports.getMe = (req, res, next) => {
-  req.params.userID = req.user.id
-  next()
-}
-
 const followUnfollow = async (req, res, followerUpdate, followingUpdate) => {
   const id = req.body.user || req.body.userId || req.body.userID
   if (!isValidObjectId(id)) throw new BadRequest('invalid user id provided')
@@ -57,18 +52,30 @@ exports.follow = catchAsync(async (req, res, next) => {
     throw new BadRequest("You can't follow yourself")
   }
   const followUpdate = { $addToSet: { followings: id } }
-  const followingUpdate = { $addToSet: { followers: req.user.id } }
+  const followingUpdate = { $addToSet: { followers: req.user._id } }
   await followUnfollow(req, res, followUpdate, followingUpdate)
 })
 
 exports.unFollow = catchAsync(async (req, res, next) => {
   const id = req.body.user || req.body.userId || req.body.userID
-  if (!req.user.following.includes(id)) {
-    throw new BadRequest('You are already following this member')
+  if (!req.user.followings.includes(id)) {
+    throw new BadRequest('You are already not following this member')
   }
   const followUpdate = { $pull: { followings: id } }
   const followingUpdate = { $pull: { followers: req.user.id } }
   const user = await followUnfollow(req, res, followUpdate, followingUpdate)
+})
+
+exports.getMe = catchAsync(async (req, res, next) => {
+  const me = await User.findById(req.user._id)
+    .populate('followers', 'username image about')
+    .populate('followings', 'username image about')
+    .populate('photos', '-owner')
+
+  res.status(200).json({
+    status: 'success',
+    data: me,
+  })
 })
 
 exports.updateMe = catchAsync(async (req, res, next) => {
@@ -105,6 +112,7 @@ exports.getMyFollowers = catchAsync(async (req, res, next) => {
   const filter = req.filter || {}
   filter.followings = req.user._id
   req.filter = filter
+  req.query.fields = ['username', 'image', 'about']
   return factory.getAll(User)(req, res, next)
 })
 
@@ -112,6 +120,7 @@ exports.getMyFollowings = catchAsync(async (req, res, next) => {
   const filter = req.filter || {}
   filter.followers = req.user._id
   req.filter = filter
+  req.query.fields = ['username', 'image', 'about']
   return factory.getAll(User)(req, res, next)
 })
 

@@ -59,7 +59,14 @@ class QueryHandler {
    */
   project() {
     if (this.queryString.fields) {
-      const fields = this.queryString.fields.split(',').join(' ')
+      let fields
+      if (this.queryString.fields instanceof String) {
+        fields = this.queryString.fields.split(',').join(' ')
+      } else if (this.queryString.fields instanceof Array) {
+        fields = this.queryString.fields.join(' ')
+      } else {
+        fields = '-__v -createdAt -updatedAt -createdBy -updatedBy'
+      }
       return fields
     } else {
       return '-__v -createdAt -updatedAt -createdBy -updatedBy'
