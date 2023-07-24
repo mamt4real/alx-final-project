@@ -10,7 +10,6 @@ const photoRouter = require('./photo.router')
 const userRouter = Router({ mergeParams: true })
 
 userRouter.use(protectedRoute)
-
 userRouter
   .route('/')
   .get(restrictRouteTo('admin'), UserController.getAllUsers)
@@ -22,6 +21,13 @@ userRouter
   .patch(uploadSinglePhoto, resizeUserPhoto, UserController.updateMe)
   .delete(UserController.deleteMe)
 
+userRouter.route('/me/followers').get(UserController.getMyFollowers)
+userRouter
+  .route('/me/followings')
+  .get(UserController.getMyFollowings)
+  .post(UserController.follow)
+  .delete(UserController.unFollow)
+
 userRouter
   .route('/:userID')
   .get(UserController.getUser)
@@ -29,11 +35,5 @@ userRouter
   .delete(UserController.deleteUser)
 
 userRouter.use('/:userID/photos', UserController.userPhotoFilter, photoRouter)
-userRouter.route('/me/followers').get(UserController.getMyFollowers)
-userRouter
-  .route('/me/followings')
-  .get(UserController.getMyFollowings)
-  .post(UserController.follow)
-  .delete(UserController.unFollow)
 
 module.exports = userRouter

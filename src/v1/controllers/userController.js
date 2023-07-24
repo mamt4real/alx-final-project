@@ -4,6 +4,7 @@ const factory = require('../../utils/handlerFactory')
 const multer = require('multer')
 const sharp = require('sharp')
 const BadRequest = require('../../errors/badRequest')
+const { isValidObjectId } = require('mongoose')
 
 const filterBody = (body, ...valids) => {
   const filtered = {}
@@ -30,12 +31,12 @@ exports.getMe = (req, res, next) => {
 }
 
 const followUnfollow = async (req, res, followerUpdate, followingUpdate) => {
+  const id = req.body.user || req.body.userId || req.body.userID
+  if (!isValidObjectId(id)) throw new BadRequest('invalid user id provided')
+
   const updates = [
     User.findByIdAndUpdate(req.user._id, followerUpdate),
-    User.findByIdAndUpdate(
-      req.body.user || req.body.userId || req.body.userID,
-      followingUpdate
-    ),
+    User.findByIdAndUpdate(id, followingUpdate),
   ]
 
   await Promise.all(updates)
