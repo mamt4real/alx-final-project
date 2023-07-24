@@ -16,6 +16,80 @@ Welcome to the Photos API documentation. This API allows users to manage their p
 - Authentication is required for all endpoints except get all photos and download a photo.
 - Include a token in the `Authorization` header for each request using the Bearer.
 
+## Authentication Endpoints
+
+### 1. Signup
+
+- **URL**: `/auth/signup`
+- **Method**: `POST`
+- **Description**: Registers a new User.
+- **Request Body**
+
+```json
+{
+  "email": "mamt4real2@gmail.com",
+  "password": "12345pass",
+  "name": "Proxy User",
+  "about": "An Intruder"
+}
+```
+
+- **Response**:
+
+- Status: 201 OK
+
+```json
+{
+  "status": "success",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YmQ4NjQyMTk3MGQ2OTA3NTkxNjliYyIsInVzZXJuYW1lIjoibWFtdDRyZWFsMiIsImlhdCI6MTY5MDE0MjI3NDg5MCwiZXhwIjoxNjkwMTQyMzYxMjkwfQ.KiWccF3zwW0cZ0eS3rAn9oaD0pLgToV1H0RoEtR-PRs",
+  "user": {
+    "email": "user2@gmail.com",
+    "name": "Proxy User",
+    "about": "An Intruder",
+    "role": "user",
+    "username": "user2",
+    "createdAt": "2023-07-23T19:57:54.733Z",
+    "updatedAt": "2023-07-23T19:57:54.733Z",
+    "id": "64bd86421970d690759169bc"
+  }
+}
+```
+
+### 2. Login
+
+- **URL**: `/auth/login`
+- **Method**: `POST`
+- **Description**: Registers a new User.
+- **Request Body**
+
+```json
+{
+  "password": "12345pass",
+  "email": "user2@gmail.com"
+}
+```
+
+- **Response**:
+
+- Status: 200 OK
+
+```json
+{
+  "status": "success",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YmQ4NjQyMTk3MGQ2OTA3NTkxNjliYyIsInVzZXJuYW1lIjoibWFtdDRyZWFsMiIsImlhdCI6MTY5MDE0MjI3NDg5MCwiZXhwIjoxNjkwMTQyMzYxMjkwfQ.KiWccF3zwW0cZ0eS3rAn9oaD0pLgToV1H0RoEtR-PRs",
+  "user": {
+    "email": "user2@gmail.com",
+    "name": "Proxy User",
+    "about": "An Intruder",
+    "role": "user",
+    "username": "user2",
+    "createdAt": "2023-07-23T19:57:54.733Z",
+    "updatedAt": "2023-07-23T19:57:54.733Z",
+    "id": "64bd86421970d690759169bc"
+  }
+}
+```
+
 ## Photos Endpoints
 
 ### 1. Get All Photos
