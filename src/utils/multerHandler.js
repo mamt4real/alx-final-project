@@ -54,7 +54,7 @@ const resizeUserPhoto = catchAsync(async (req, res, next) => {
   req.file.filename = `user-${req.user?._id}-profile.jpeg`
 
   await sharp(req.file.buffer)
-    .resize(500, 500)
+    .resize(300, 320)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
     .toFile(getPhotoLocalPath(`users/${req.file.filename}`))
