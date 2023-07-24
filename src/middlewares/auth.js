@@ -4,7 +4,10 @@ const NotFound = require('../errors/not-found')
 const catchAsync = require('../utils/catchAsync')
 const UnAuthenticated = require('../errors/unAuthenticated')
 
-// Protect routes
+/**
+ * Protect a Route (Authentication)
+ * Only Accessible when logged in
+ */
 exports.protectedRoute = catchAsync(async (req, res, next) => {
   let token
 
@@ -69,4 +72,21 @@ exports.isLoggedIn = async (req, res, next) => {
   }
   res.locals.user = user
   next()
+}
+
+/**
+ * Protects a Route (Authorization)
+ * Only Users with the specified roles can access
+ * @param  {...string} roles
+ * @returns
+ */
+exports.restrictRouteTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      throw new UnAuthenticated(
+        'Ooops you are not cleared to perform this action'
+      )
+    }
+    next()
+  }
 }
