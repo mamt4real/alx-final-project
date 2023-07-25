@@ -59,7 +59,7 @@ Welcome to the Photos API documentation. This API allows users to manage their p
 
 - **URL**: `/auth/login`
 - **Method**: `POST`
-- **Description**: Registers a new User.
+- **Description**: Logs in a User.
 - **Request Body**
 
 ```json
@@ -210,6 +210,17 @@ Welcome to the Photos API documentation. This API allows users to manage their p
   - `id`: (string) The ID of the photo to delete.
 - **Response**:
 - Status: 204 No Content
+
+### 6. Download a Photo
+
+- **URL**: `/photos/:id/download`
+- **Method**: `GET`
+- **Description**: Download a photo from the collection.
+- **Request Parameters**:
+  - `id`: (string) The ID of the photo to download.
+- **Response**:
+  Status: 200 OK
+  `blob file of the image`
 
 ## Users Endpoints
 
