@@ -1,6 +1,7 @@
 # AlX Final Specialization Project
 
 - Author: [Mahadi Abuhuraira](https://github.com/mamt4real)
+- Date: 15th July, 2023
 
 # E-Photos API Documentation
 
@@ -361,8 +362,6 @@ Status: 200 OK
 }
 ```
 
-=
-
 ### 2. Unfollow a User
 
 - **URL**: `/users/me/followings`
@@ -393,6 +392,23 @@ Status: 200 OK
 - **URL**: `/photos/:photoId/like`
 - **Method**: `POST`
 - **Description**: Like a photo.
+- **Request Parameters**:
+  - `photoId`: (string) The ID of the photo to like.
+- **Response**:
+  Status: 200 Ok
+
+```json
+{
+  "status": "success",
+  "message": "Updated successfully"
+}
+```
+
+### 1. UnLike a Photo
+
+- **URL**: `/photos/:photoId/like`
+- **Method**: `DELETE`
+- **Description**: UnLike a photo.
 - **Request Parameters**:
   - `photoId`: (string) The ID of the photo to like.
 - **Response**:
