@@ -109,19 +109,25 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 })
 
 exports.getMyFollowers = catchAsync(async (req, res, next) => {
-  const filter = req.filter || {}
-  filter.followings = req.user._id
-  req.filter = filter
-  req.query.fields = ['username', 'image', 'about']
-  return factory.getAll(User)(req, res, next)
+  const data = await User.find({ followings: req.user._id }).select(
+    'username image about'
+  )
+  res.status(200).json({
+    status: 'success',
+    result: data.length,
+    data,
+  })
 })
 
 exports.getMyFollowings = catchAsync(async (req, res, next) => {
-  const filter = req.filter || {}
-  filter.followers = req.user._id
-  req.filter = filter
-  req.query.fields = ['username', 'image', 'about']
-  return factory.getAll(User)(req, res, next)
+  const data = await User.find({ followers: req.user._id }).select(
+    'username image about'
+  )
+  res.status(200).json({
+    status: 'success',
+    result: data.length,
+    data,
+  })
 })
 
 exports.getAllUsers = factory.getAll(User)
